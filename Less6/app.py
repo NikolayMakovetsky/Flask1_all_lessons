@@ -60,11 +60,9 @@ class QuoteModel(db.Model):
             "text": self.text,
             "rating": self.rating,
             "author_id": self.author_id,
-            # "author_name": AuthorModel.query.get(self.author_id).name,
-            # "author_surname": AuthorModel.query.get(self.author_id).surname            
             "author_name": self.author.name, # backref='author'
             "author_surname": self.author.surname # backref='author'
-            }
+        }
 
 
 # Обработка ошибок и возврат значения в виде JSON
