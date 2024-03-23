@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db) 
+migrate = Migrate(app, db)
 
 
 class AuthorModel(db.Model):
@@ -54,7 +54,7 @@ class QuoteModel(db.Model):
     def __repr__(self) -> str:
         return f"Quote: {self.text}"
     
-    def to_dict(self, name, surname):
+    def to_dict(self):
         return {
             "id": self.id,
             "text": self.text,
@@ -62,8 +62,8 @@ class QuoteModel(db.Model):
             "author_id": self.author_id,
             # "author_name": AuthorModel.query.get(self.author_id).name,
             # "author_surname": AuthorModel.query.get(self.author_id).surname            
-            "author_name": name,
-            "author_surname": surname
+            "author_name": self.author.name, # backref='author'
+            "author_surname": self.author.surname # backref='author'
             }
 
 
@@ -237,14 +237,24 @@ def get_rating_down(quote_id):
 def get_quotes_by_author_id(author_id):
 
     # author_id_quotes = QuoteModel.query.filter_by(author_id = author_id).all()
-    author_id_quotes = QuoteModel.query.join(AuthorModel, AuthorModel.id == QuoteModel.author_id).filter(QuoteModel.author_id == author_id).all()
+    # author_id_quotes = QuoteModel.query.join(AuthorModel, AuthorModel.id == QuoteModel.author_id).filter(QuoteModel.author_id == author_id).all()
+
+    author_id_quotes = db.session.query(QuoteModel, AuthorModel.name, AuthorModel.surname).join(AuthorModel).filter(QuoteModel.author_id == author_id).all()
+    print(type(author_id_quotes))
 
     if author_id_quotes:
         quotes = []
-        for a_id_quote in author_id_quotes: # USING backref='author'
-            quotes.append(a_id_quote.to_dict(a_id_quote.author.name, a_id_quote.author.surname))
+        for a_id_quote in author_id_quotes:
+            quotes.append(a_id_quote.to_dict())
+    #         quotes.append({"author_id": a_id_quote.quotes_author_id,})
+    # "author_id": 5,
+    # "author_name": "Clint",
+    # "author_surname": "Eastwood",
+    # "id": 12,
+    # "rating": 1,
+    # "text": "Quote by default"
         return jsonify(quotes), 200
-    return jsonify([]), 200   
+    return jsonify([]), 200
 
 # CREATE QUOTE BY AUTHOR_ID
 @app.post("/authors/<int:author_id>/quotes")
