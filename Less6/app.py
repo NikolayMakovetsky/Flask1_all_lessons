@@ -237,24 +237,30 @@ def get_rating_down(quote_id):
 def get_quotes_by_author_id(author_id):
 
     # author_id_quotes = QuoteModel.query.filter_by(author_id = author_id).all()
-    # author_id_quotes = QuoteModel.query.join(AuthorModel, AuthorModel.id == QuoteModel.author_id).filter(QuoteModel.author_id == author_id).all()
+    author_id_quotes = QuoteModel.query.join(AuthorModel, AuthorModel.id == QuoteModel.author_id).filter(QuoteModel.author_id == author_id).all()
 
-    author_id_quotes = db.session.query(QuoteModel, AuthorModel.name, AuthorModel.surname).join(AuthorModel).filter(QuoteModel.author_id == author_id).all()
-    print(type(author_id_quotes))
+    # author_id_quotes = db.session.query(QuoteModel, AuthorModel.name, AuthorModel.surname).join(AuthorModel).filter(QuoteModel.author_id == author_id).all()
+    # print(type(author_id_quotes))
 
     if author_id_quotes:
         quotes = []
         for a_id_quote in author_id_quotes:
             quotes.append(a_id_quote.to_dict())
-    #         quotes.append({"author_id": a_id_quote.quotes_author_id,})
+        return jsonify(quotes), 200
+    return jsonify([]), 200
+
+    #         quotes.append( \
+    #         {
+    #             "author_id": a_id_quote.quotes_author_id,
+    #             "author_name": a_id_quote.author_name,
+    #         })
     # "author_id": 5,
     # "author_name": "Clint",
     # "author_surname": "Eastwood",
     # "id": 12,
     # "rating": 1,
     # "text": "Quote by default"
-        return jsonify(quotes), 200
-    return jsonify([]), 200
+
 
 # CREATE QUOTE BY AUTHOR_ID
 @app.post("/authors/<int:author_id>/quotes")
